@@ -1,9 +1,9 @@
-name: Compilar Plugin JIT Linux
+name: Compilar Plugin JIT Linux (Static)
 on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04  # Usamos una versión más compatible de base
     steps:
       - name: Checkout del código
         uses: actions/checkout@v3
@@ -17,17 +17,26 @@ jobs:
 
       - name: Configurar y Compilar
         run: |
+          # Limpiamos carpetas anteriores
           rm -rf build_linux
           mkdir build_linux
           cd build_linux
-          cmake -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32 ..
+          
+          # Configuramos con banderas estáticas para máxima compatibilidad
+          cmake -DCMAKE_C_FLAGS="-m32" \
+                -DCMAKE_CXX_FLAGS="-m32 -static-libstdc++ -static-libgcc" \
+                ..
+          
+          # Compilamos
           make
 
-      - name: Listar archivos generados (Debug)
-        run: find build_linux -name "*.so"
+      - name: Buscar y Organizar Binarios
+        run: |
+          mkdir -p output
+          find build_linux -name "*.so" -exec cp {} output/ \;
 
       - name: Guardar archivo .so
         uses: actions/upload-artifact@v4
         with:
-          name: jit-linux-so
-          path: build_linux/**/*.so
+          name: jit-linux-static
+          path: output/*.so
