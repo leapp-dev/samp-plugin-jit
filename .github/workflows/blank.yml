@@ -17,16 +17,17 @@ jobs:
 
       - name: Configurar y Compilar
         run: |
-          # Eliminamos cualquier carpeta build previa para evitar conflictos
-          rm -rf build_linux 
+          rm -rf build_linux
           mkdir build_linux
           cd build_linux
-          # Forzamos la arquitectura de 32 bits y apuntamos al CMakeLists.txt de la raíz (..)
           cmake -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32 ..
           make
+
+      - name: Listar archivos generados (Debug)
+        run: find build_linux -name "*.so"
 
       - name: Guardar archivo .so
         uses: actions/upload-artifact@v4
         with:
           name: jit-linux-so
-          path: build_linux/jit.so
+          path: build_linux/**/*.so
