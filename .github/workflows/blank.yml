@@ -14,7 +14,7 @@ jobs:
           apt-get install -y git build-essential cmake gcc-multilib g++-multilib
       
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
       
@@ -25,7 +25,7 @@ jobs:
           make
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: jit-plugin
           path: build/*.so
