@@ -12,19 +12,21 @@ jobs:
       TZ: America/New_York
     
     steps:
-      - name: Install dependencies
-        run: |
-          apt-get update
-          apt-get install -y git build-essential cmake gcc-multilib g++-multilib
-      
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           submodules: recursive
       
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y git build-essential cmake gcc-multilib g++-multilib
+      
       - name: Build plugin
         run: |
-          mkdir build && cd build
+          rm -rf build
+          mkdir build
+          cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-m32 -DCMAKE_C_FLAGS=-m32
           make
       
