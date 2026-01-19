@@ -1,42 +1,31 @@
-name: Compilar Plugin JIT Linux (Static)
-on: [push, workflow_dispatch]
+name: Build JIT Plugin
+
+on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    container: ubuntu:20.04  # O la versión que necesites
+    
     steps:
-      - name: Checkout del código
-        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y git build-essential cmake gcc-multilib g++-multilib
+      
+      - name: Checkout code
+        uses: actions/checkout@v2
         with:
           submodules: recursive
-
-      - name: Instalar herramientas de 32 bits
+      
+      - name: Build plugin
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-multilib g++-multilib cmake
-
-      - name: Configurar y Compilar
-        run: |
-          # Limpiamos carpetas anteriores
-          rm -rf build_linux
-          mkdir build_linux
-          cd build_linux
-          
-          # Configuramos con banderas estáticas para máxima compatibilidad
-          cmake -DCMAKE_C_FLAGS="-m32" \
-                -DCMAKE_CXX_FLAGS="-m32 -static-libstdc++ -static-libgcc" \
-                ..
-          
-          # Compilamos
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-m32 -DCMAKE_C_FLAGS=-m32
           make
-
-      - name: Buscar y Organizar Binarios
-        run: |
-          mkdir -p output
-          find build_linux -name "*.so" -exec cp {} output/ \;
-
-      - name: Guardar archivo .so
-        uses: actions/upload-artifact@v4
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
         with:
-          name: jit-linux-static
-          path: output/*.so
+          name: jit-plugin
+          path: build/*.so
