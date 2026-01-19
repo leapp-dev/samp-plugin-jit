@@ -1,0 +1,24 @@
+name: Compilar Plugin JIT Linux
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Instalar herramientas de 32 bits
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-multilib g++-multilib cmake
+      - name: Compilar
+        run: |
+          mkdir build && cd build
+          cmake -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32 ..
+          make
+      - name: Guardar archivo .so
+        uses: actions/upload-artifact@v4
+        with:
+          name: jit-linux-so
+          path: build/jit.so
